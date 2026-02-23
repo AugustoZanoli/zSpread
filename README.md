@@ -12,7 +12,7 @@ zSpread eliminates that by letting you describe your data with annotations and h
 
 ---
 
-## How it works
+## How it will work
 
 Annotate your DTO fields with `@Coluna`:
 
@@ -47,7 +47,7 @@ List<ContatoDTO> contatos = resultado.getDados();
 
 | Format | Export | Import |
 |--------|--------|--------|
-| `.xlsx` | ✅ | ✅ |
+| `.xlsx` | 🔜 | 🔜 |
 | `.docx` | 🔜 | 🔜 |
 
 ---
