@@ -1,24 +1,25 @@
 package br.com.clean.core.spreadsheet;
 
-import br.com.clean.annotations.Coluna;
+import br.com.clean.annotations.Spreadsheet;
+import br.com.clean.exceptions.GenerateBodyException;
+import br.com.clean.exceptions.GenerateBytesExportException;
+import br.com.clean.exceptions.GenerateWorkbookException;
 import br.com.clean.validator.Validator;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Stream;
 
-public class Spreadsheet {
+public class Exporter {
 
     private final Validator validator;
 
-    public Spreadsheet(Validator validator) {
+    public Exporter(Validator validator) {
         this.validator = validator;
     }
 
@@ -31,7 +32,8 @@ public class Spreadsheet {
         Field[] objectFields = clazz.getDeclaredFields();
 
         List<Field> annotatedFields = Stream.of(objectFields)
-                .filter(field -> field.isAnnotationPresent(br.com.clean.annotations.Coluna.class))
+                .filter(field -> field.isAnnotationPresent(Spreadsheet.class))
+                .sorted(Comparator.comparingInt(f -> f.getAnnotation(Spreadsheet.class).ordem()))
                 .toList();
 
         validator.validateObjects(annotatedFields);
@@ -44,7 +46,7 @@ public class Spreadsheet {
             workbook.close();
             return outputStream.toByteArray();
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new GenerateBytesExportException("Failed generating bytes from the generated spreadsheet!", e);
         }
     }
 
@@ -59,28 +61,40 @@ public class Spreadsheet {
 
             generateBody(objects, annotatedFields, sheet);
 
+            for (int i = 0; i < annotatedFields.size(); i++) {
+                sheet.autoSizeColumn(i);
+            }
+
             return workbook;
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new GenerateWorkbookException("Failed to generate the workbook!", e);
         }
     }
 
     private static void generateHeader(List<Field> annotatedFields, Sheet sheet) {
 
+        CellStyle style = createHeaderStyle(sheet);
+
+        Row headerRow = sheet.createRow(0);
+
         // Creating the header row based on the annotated fields
         for (Field field : annotatedFields){
-            Coluna colunaAnnotation = field.getAnnotation(Coluna.class);
+            Spreadsheet colunaAnnotation = field.getAnnotation(Spreadsheet.class);
             String columnName = colunaAnnotation.name();
             int columnIndex = annotatedFields.indexOf(field);
 
-            Row headerRow = sheet.getRow(0);
-            if (headerRow == null) {
-                headerRow = sheet.createRow(0);
-            }
-
             Cell cell = headerRow.createCell(columnIndex);
             cell.setCellValue(columnName);
+            cell.setCellStyle(style);
         }
+    }
+
+    private static CellStyle createHeaderStyle(Sheet sheet) {
+        CellStyle style = sheet.getWorkbook().createCellStyle();
+        style.setFillForegroundColor(IndexedColors.AQUA.getIndex());
+        style.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+        style.setAlignment(HorizontalAlignment.LEFT);
+        return style;
     }
 
     private <T> void generateBody(List<T> objects, List<Field> annotatedFields, Sheet sheet) {
@@ -102,8 +116,7 @@ public class Spreadsheet {
                     Cell cell = row.createCell(columnIndex);
                     cell.setCellValue(value != null ? value.toString() : "");
                 } catch (IllegalAccessException e) {
-                    throw new RuntimeException(e);
-                }
+                    throw new GenerateBodyException("Failed to read field '" + field.getName() + "' while generating body row " + i, e);                }
             }
         }
     }

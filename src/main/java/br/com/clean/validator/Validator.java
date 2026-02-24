@@ -14,5 +14,4 @@ public class Validator {
         if (string.isBlank()) throw new IllegalArgumentException("A string não pode estar em branco.");
     }
 
-
 }

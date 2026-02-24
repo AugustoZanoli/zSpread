@@ -7,8 +7,10 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
-public @interface Coluna {
+public @interface Spreadsheet {
     String name();
+
     int ordem() default 0;
+
     boolean notNull() default false;
 }

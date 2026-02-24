@@ -1,13 +1,13 @@
 package spreadhseetTests;
 
-import br.com.clean.annotations.Coluna;
+import br.com.clean.annotations.Spreadsheet;
 
 public class TesteDTO {
 
-    @Coluna(name = "Nome")
+    @Spreadsheet(name = "Nome", ordem = 2)
     private String nome;
 
-    @Coluna(name = "Sobrenome")
+    @Spreadsheet(name = "Sobrenome")
     private String sobrenome;
 
     private String trabalho;
