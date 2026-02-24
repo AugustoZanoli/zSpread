@@ -4,7 +4,7 @@ import br.com.clean.annotations.Spreadsheet;
 import br.com.clean.exceptions.GenerateBodyException;
 import br.com.clean.exceptions.GenerateBytesExportException;
 import br.com.clean.exceptions.GenerateWorkbookException;
-import br.com.clean.validator.Validator;
+import br.com.clean.core.spreadsheet.validators.Validator;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 

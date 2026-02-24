@@ -2,7 +2,7 @@ package br.com.clean;
 
 
 import br.com.clean.core.spreadsheet.Exporter;
-import br.com.clean.validator.Validator;
+import br.com.clean.core.spreadsheet.validators.Validator;
 
 import java.util.List;
 

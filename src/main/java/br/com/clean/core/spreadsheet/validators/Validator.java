@@ -1,4 +1,4 @@
-package br.com.clean.validator;
+package br.com.clean.core.spreadsheet.validators;
 
 import java.util.List;
 import java.util.Objects;
