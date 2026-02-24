@@ -1,6 +1,7 @@
 package br.com.clean.core.spreadsheet;
 
 import br.com.clean.annotations.Coluna;
+import br.com.clean.validator.Validator;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -11,21 +12,29 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Stream;
 
 public class Spreadsheet {
 
-    public <T> byte[] export(List<Object> objects, String spreadsheetName) {
+    private final Validator validator;
 
+    public Spreadsheet(Validator validator) {
+        this.validator = validator;
+    }
 
-        Class<T> objectClass = (Class<T>) objects.get(0).getClass();
+    public <T> byte[] export(List<T> objects, Class<T> clazz, String spreadsheetName) {
 
-        Field[] objectFields = objectClass.getDeclaredFields();
+        validator.validateObjects(objects);
+
+        validator.validateString(spreadsheetName);
+
+        Field[] objectFields = clazz.getDeclaredFields();
 
         List<Field> annotatedFields = Stream.of(objectFields)
                 .filter(field -> field.isAnnotationPresent(br.com.clean.annotations.Coluna.class))
                 .toList();
+
+        validator.validateObjects(annotatedFields);
 
         Workbook workbook = generateWorkbook(objects, annotatedFields, spreadsheetName);
 
@@ -39,7 +48,7 @@ public class Spreadsheet {
         }
     }
 
-    private Workbook generateWorkbook(List<Object> objects, List<Field> annotatedFields, String spreadsheetName) {
+    private <T> Workbook generateWorkbook(List<T> objects, List<Field> annotatedFields, String spreadsheetName) {
         try {
             // Creating the workbook and sheet
             Workbook workbook = new XSSFWorkbook();
@@ -74,7 +83,7 @@ public class Spreadsheet {
         }
     }
 
-    private void generateBody(List<Object> objects, List<Field> annotatedFields, Sheet sheet) {
+    private <T> void generateBody(List<T> objects, List<Field> annotatedFields, Sheet sheet) {
 
         // Creating the body rows based on the annotated fields and the list of objects
         for (int i = 0; i < objects.size(); i++) {
