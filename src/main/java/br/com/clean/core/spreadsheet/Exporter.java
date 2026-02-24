@@ -4,7 +4,6 @@ import br.com.clean.annotations.Spreadsheet;
 import br.com.clean.exceptions.GenerateBodyException;
 import br.com.clean.exceptions.GenerateBytesExportException;
 import br.com.clean.exceptions.GenerateWorkbookException;
-import br.com.clean.core.spreadsheet.validators.Validator;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
@@ -17,9 +16,9 @@ import java.util.stream.Stream;
 
 public class Exporter {
 
-    private final Validator validator;
+    private final SpreedsheetValidator validator;
 
-    public Exporter(Validator validator) {
+    public Exporter(SpreedsheetValidator validator) {
         this.validator = validator;
     }
 
